@@ -1,0 +1,40 @@
+# Project: CoffeeMachine
+# Makefile created by Dev-C++ 5.11
+
+CPP      = g++.exe
+CC       = gcc.exe
+WINDRES  = windres.exe
+OBJ      = main.o solver.o robot.o Point.o JointFrame.o
+LINKOBJ  = main.o solver.o robot.o Point.o JointFrame.o
+LIBS     = -L"D:/devCpp/Dev-Cpp/MinGW64/lib" -L"D:/devCpp/Dev-Cpp/MinGW64/x86_64-w64-mingw32/lib" -static-libgcc
+INCS     = -I"D:/devCpp/Dev-Cpp/MinGW64/include" -I"D:/devCpp/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/devCpp/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/devCpp/project/CoffeeMachine/eigen"
+CXXINCS  = -I"D:/devCpp/Dev-Cpp/MinGW64/include" -I"D:/devCpp/Dev-Cpp/MinGW64/x86_64-w64-mingw32/include" -I"D:/devCpp/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include" -I"D:/devCpp/Dev-Cpp/MinGW64/lib/gcc/x86_64-w64-mingw32/4.9.2/include/c++" -I"D:/devCpp/project/CoffeeMachine/eigen"
+BIN      = CoffeeMachine.exe
+CXXFLAGS = $(CXXINCS) 
+CFLAGS   = $(INCS) 
+RM       = rm.exe -f
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before $(BIN) all-after
+
+clean: clean-custom
+	${RM} $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CPP) $(LINKOBJ) -o $(BIN) $(LIBS)
+
+main.o: main.cpp
+	$(CPP) -c main.cpp -o main.o $(CXXFLAGS)
+
+solver.o: solver.cpp
+	$(CPP) -c solver.cpp -o solver.o $(CXXFLAGS)
+
+robot.o: robot.cpp
+	$(CPP) -c robot.cpp -o robot.o $(CXXFLAGS)
+
+Point.o: Point.cpp
+	$(CPP) -c Point.cpp -o Point.o $(CXXFLAGS)
+
+JointFrame.o: JointFrame.cpp
+	$(CPP) -c JointFrame.cpp -o JointFrame.o $(CXXFLAGS)
