@@ -1,0 +1,252 @@
+#include"segement.h"
+#include"frame.h"
+#include"point.h"
+#include<iostream>
+#include"solver.h"
+using namespace std;
+int main(){
+	segement sg1,sg2;
+	sg1.segementset(10,30,180);
+	sg2.segementset(15,25,240); 
+	point despoint;
+	despoint.set(25,5); 
+	solver solver1;
+	solver solver2;
+	solver1.solverangleset(45,45);//正解 
+	solver1.normalsolve(sg1,sg2);
+	solver2.solverdestpointset(15,5);//反解 
+	solver2.inversolve(sg1,sg2);
+	cout<<"程序结束"<<endl;
+	getchar();
+	 return 0; 
+	
+}
+
+#ifndef SEGEMENT_H
+#define SEGEMENT_H
+#include "point.h"
+class segement
+{
+	public:
+		segement();
+		segement(double,double,double);
+		void segementset(double,double,double);
+	//void rotate();
+	double getlength();
+	double getstangle();
+	double getendangle();
+	private:
+		double length;
+		double stangle;
+		double endangle;
+};
+
+#endif
+
+#include "segement.h"
+#include "point.h"
+
+segement::segement()
+{
+}
+
+segement::segement(double lth,double stag,double edag){
+		length=lth;
+		stangle=stag;
+		endangle=edag;
+}
+double segement::getlength(){
+	return length;
+	
+}
+double segement::getstangle(){
+	return stangle;
+}
+double segement::getendangle(){
+	return endangle;
+}
+
+void segement::segementset(double lth,double stag,double edag){
+		length=lth;
+		stangle=stag;
+		endangle=edag;
+}
+
+
+#ifndef FRAME_H
+#define FRAME_H
+#include "point.h"
+class frame
+{
+	public:
+		frame();
+        
+		
+	private:
+  point zero;
+  double xangle;
+		
+};
+
+#endif
+#include "frame.h"
+
+frame::frame()
+{
+}
+#ifndef POINT_H
+#define POINT_H
+
+class point
+{
+	public:
+		point();
+		point(double xx,double yy);
+		double getx();
+		double gety();
+		void move(double dx,double dy);
+		void rotate(double beta);	
+		void set(double sx,double sy);
+	private:
+		double  x;
+		double  y;
+};
+
+#endif
+
+#include "point.h"
+#include <math.h>
+
+point::point()
+{
+}
+
+point::point(double xx,double yy){
+	x=xx;
+	y=yy;
+}
+
+void point::move(double dx,double dy){
+	x+=dx;
+	y+=dy;
+	
+}
+void point::rotate(double beta){
+	beta=beta*3.1415926/180;
+	double tempx=x*sin(beta)+y*cos(beta);
+	double tempy=-x*cos(beta)+y*sin(beta);
+	x=tempx;
+	y=tempy;
+	
+}
+double point::getx(){
+return x;	
+}
+double point::gety(){
+return y;	
+}
+void point::set(double sx,double sy){
+	x=sx;
+	y=sy;
+}
+
+#ifndef SOLVER_H
+#define SOLVER_H
+#include "point.h"
+#include "segement.h"
+
+class solver
+{
+	public:
+		solver();
+		void solverangleset(double,double);
+		void solverdestpointset(double ,double );
+		void normalsolve(segement,segement);
+		void inversolve(segement,segement);
+		double get_solutionpointx(); 
+		double get_solutionpointy(); 
+		double get_solutionangle1();
+		double get_solutionangle2();
+	private:
+	    point destpoint;
+	    double joint1angle;
+     	double joint2angle;
+
+};
+
+#endif
+
+#include "solver.h"
+#include "point.h"
+#include <math.h>
+#include "segement.h"
+#include<iostream>
+using namespace std;
+solver::solver()
+{
+}
+void solver::solverangleset(double ag1,double ag2){
+	    joint1angle=ag1;
+        joint2angle=ag2;	
+	
+}
+void solver::solverdestpointset(double dex,double dey){
+	destpoint.set(dex,dey);
+}
+void solver::normalsolve(segement s1,segement s2){
+	double ag1=joint1angle*3.1415926/180;
+	double ag2=joint2angle*3.1415926/180;
+	if(joint1angle<s1.getstangle()||joint1angle>s1.getendangle()) cout<<"segement1的角度超过运动范围"<<endl;
+	else{
+			if(joint2angle<s2.getstangle()||joint2angle>s2.getendangle()) cout<<"segement2的角度超过运动范围"<<endl;
+			else{
+					double tempdestx=cos(ag1)*s1.getlength()+cos(ag2)*s2.getlength();
+	                double tempdesty=sin(ag1)*s1.getlength()+sin(ag2)*s2.getlength();
+	                destpoint.set(tempdestx,tempdesty);
+	                cout<<"机械手的末端坐标为"<<endl;
+					cout<<"(" <<destpoint.getx()<<","<<destpoint.gety()<<")"<<endl;
+			}
+
+	}
+     
+	
+}
+void solver::inversolve(segement s1,segement s2){
+	double xf=destpoint.getx()*destpoint.getx();
+	double yf=destpoint.gety()*destpoint.gety();
+	double temp1=xf+yf+s2.getlength()*s2.getlength()-s1.getlength();
+	double temp2=asin(temp1/(2*s2.getlength()*sqrt(xf+yf)));
+	double bt=atan(destpoint.getx()/destpoint.gety());
+	joint1angle=temp2-bt;//第一个角的解 
+    double xf2=destpoint.getx()*destpoint.getx();
+	double yf2=destpoint.gety()*destpoint.gety();
+	double temp3=xf+yf-s2.getlength()*s2.getlength()+s1.getlength();
+	double temp4=asin(temp3/(2*s1.getlength()*sqrt(xf2+yf2)));
+	joint2angle=temp4-bt;//第二个角的解 
+	if(joint1angle<s1.getstangle()||joint1angle>s1.getendangle()) cout<<"segement1的角度超过运动范围"<<endl;
+	else{
+			if(joint2angle<s2.getstangle()||joint2angle>s2.getendangle()) cout<<"segement2的角度超过运动范围"<<endl;
+			else{
+				 cout<<"机械手的各个segement转动角度为"<<endl;
+				 cout<<"(" <<joint1angle<<","<<joint2angle<<")"<<endl;
+				
+			}
+		
+	}
+	
+	
+	
+	
+}
+double solver::get_solutionpointx(){
+	return  destpoint.getx();
+}
+double solver::get_solutionpointy(){
+	return destpoint.gety();
+}
+double solver::get_solutionangle1(){
+	return joint1angle;
+}
+double solver::get_solutionangle2(){
+	return joint2angle;
+}
