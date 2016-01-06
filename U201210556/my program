@@ -1,0 +1,88 @@
+#include<iostream>
+#include <Eigen/Dense>
+#include <math.h>
+#include <vector>aa
+using namespace std;
+using namespace Eigen;
+using Eigen::MatrixXd;
+const double Pi=3.1415926;
+class Frame{
+private:
+double Ox;
+double Oy; 
+double Ang; 
+public:
+Frame(){
+Ox=0;Oy=0;Ang=0;
+};
+Frame(double ox,double oy,double ang){
+Ox=ox;Oy=oy;Ang=ang*Pi/180;
+};
+MatrixXd transfer(){
+MatrixXd trans(3,3);
+trans(0,0)=cos(Ang);trans(0,1)=-sin(Ang);trans(0,2)=Ox;
+trans(1,0)=sin(Ang);trans(1,1)=cos(Ang); trans(1,2)=Oy;
+trans(2,0)=0; trans(2,1)=0; trans(2,2)=1;
+return trans; 
+}
+}; 
+class Solver{
+private:
+vector<Frame> frameVec;
+public:
+MatrixXd CalTheta(double l1,double l2,Frame frame,double px,double py){
+MatrixXd TF(3,1),WF(3,1),T(2,1);
+TF(0,0)=px;TF(1,0)=py;TF(2,0)=1;
+WF=frame.transfer()*TF;
+T(0,0)=acos((px*px+py*py-l1*l1-l2*l2)/2/l1/l2); 
+double beta=atan2(py,px); 
+double lp=sqrt(px*px+py*py); 
+double fea=acos((lp*lp+l1*l1-l2*l2)/2/l1/lp);
+T(1,0)=beta-fea;
+return T;
+};
+void addFrame(Frame frame) {
+frameVec.push_back(frame);
+};
+void deleteFrame(){
+frameVec.pop_back();
+};	
+}; 
+class Robot{
+public:
+double L1;
+double L2; 
+double ang1;
+double ang2;
+
+Robot(){
+L1=100;L2=100;ang1=0;ang2=0; 
+};
+Robot(double l1,double l2,double a1,double a2){
+L1=l1;L2=l2;ang1=a1*Pi/180;ang2=a2*Pi/180; 
+};
+Vector2d getang(){
+MatrixXd T(2,1);
+T(0,0)=L1*cos(ang1)+L2*cos(ang1+ang2);
+T(1,0)=L1*sin(ang1)+L2*sin(ang1+ang2);
+return T;
+};;
+void Output(){
+cout<<"第一个臂角度为"<<ang1*180/Pi<<endl<<"第二个臂角度为"<<ang2*180/Pi<<endl;
+};
+void PTPmove(Frame frame,double px,double py){
+Solver solver;
+MatrixXd T(2,1);
+T=solver. CalTheta(L1,L2,frame,px,py);
+ang1=T(0,0);ang2=T(1,0);
+}
+}; 
+int main(){
+Robot myRobot(150,150,0,30);//构造Robot对象 
+Frame TF1(5,6,10),TF2(15,20,-30),TF3(23,17,90);//定义任务坐标系 
+myRobot.Output();
+myRobot.PTPmove(TF1,10,10);
+myRobot.Output();
+myRobot.PTPmove(TF2,30,20);
+myRobot.Output();
+return 0;}
